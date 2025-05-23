@@ -2,9 +2,9 @@ import pygame
 import random
 from constants_for_game import screen,left_margin,right_margin
 class Character(pygame.sprite.Sprite):
-    def __init__(self,x,y,opponent=False):
+    def __init__(self,x,y):
         pygame.sprite.Sprite.__init__(self)
-        self.speed = 5
+        self.speed = 1
         self.health = 100
         self.max_health= 100
         self.health_bar_length= 300
@@ -44,6 +44,17 @@ class Character(pygame.sprite.Sprite):
             self.rect.x = left_margin
         if self.rect.x > right_margin:
             self.rect.x = right_margin
+    def move_as_opponent(self,player):
+        if self.alive:
+            if self.rect.x < player.rect.x:
+                self.rect.x += self.speed
+                self.flip= False
+                self.direction = 1
+            elif self.rect.x > player.rect.x:
+                self.rect.x -= self.speed
+                self.flip=True
+                self.direction = -1 
+
 
     def get_damage(self, attack_power):
         damage = max(0,attack_power - self.defense_power)
@@ -55,12 +66,16 @@ class Character(pygame.sprite.Sprite):
         if self.health <= 0:
             self.health = 0
             self.alive = False
+            self.kill()
+            self.rect=pygame.Rect(0,0,0,0)
     
     def attack(self, target):
         attack_power = self.attack_power
         if self.special_ability == "extra_attack":
             attack_power = int(attack_power * 1.5)
-        target.get_damage(attack_power)
+        if self.rect.colliderect(target.rect):
+            target.get_damage(attack_power)
+
     def basic_health(self):
         if not self.displayed_health:
             self.displayed_health = self.health
