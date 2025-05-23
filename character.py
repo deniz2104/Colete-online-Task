@@ -2,7 +2,7 @@ import pygame
 import random
 from constants_for_game import screen,left_margin,right_margin
 class Character(pygame.sprite.Sprite):
-    def __init__(self,x,y):
+    def __init__(self,x,y,opponent=False):
         pygame.sprite.Sprite.__init__(self)
         self.speed = 5
         self.health = 100
@@ -22,9 +22,6 @@ class Character(pygame.sprite.Sprite):
         self.rect.topleft=(x,y)
         self.initial_position = x
         self.special_ability=random.choice([None,"extra_attack","self_heal","half_damage_ability"])
-
-    def activate_special_ability(self):
-        return random.random() < 0.25
 
     def draw(self):
         if self.alive:
@@ -50,10 +47,10 @@ class Character(pygame.sprite.Sprite):
 
     def get_damage(self, attack_power):
         damage = max(0,attack_power - self.defense_power)
-        if self.special_ability == "half_damage_ability" and self.activate_special_ability():
+        if self.special_ability == "half_damage_ability":
             damage = damage // 2
         self.health -= damage
-        if self.special_ability == "self_heal" and self.health<30 and self.activate_special_ability():
+        if self.special_ability == "self_heal" and self.health<30:
             self.health += 5
         if self.health <= 0:
             self.health = 0
@@ -61,7 +58,7 @@ class Character(pygame.sprite.Sprite):
     
     def attack(self, target):
         attack_power = self.attack_power
-        if self.special_ability == "extra_attack" and self.activate_special_ability():
+        if self.special_ability == "extra_attack":
             attack_power = int(attack_power * 1.5)
         target.get_damage(attack_power)
     def basic_health(self):
