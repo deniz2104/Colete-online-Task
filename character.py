@@ -15,12 +15,10 @@ class Character(pygame.sprite.Sprite):
         self.alive = True 
         self.image= pygame.image.load('character.png').convert_alpha()
         self.image_right=pygame.image.load('character_right.png').convert_alpha()
-        self.mask=pygame.mask.from_surface(self.image)
         self.flip = False
         self.direction=1
         self.rect=self.image.get_rect()
         self.rect.topleft=(x,y)
-        self.initial_position = x
         self.special_ability=random.choice([None,"extra_attack","self_heal","half_damage_ability"])
 
     def draw(self):
@@ -46,14 +44,16 @@ class Character(pygame.sprite.Sprite):
             self.rect.x = right_margin
     def move_as_opponent(self,player):
         if self.alive:
-            if self.rect.x < player.rect.x:
-                self.rect.x += self.speed
-                self.flip= False
-                self.direction = 1
-            elif self.rect.x > player.rect.x:
-                self.rect.x -= self.speed
-                self.flip=True
-                self.direction = -1 
+            distance = abs(self.rect.x - player.rect.x)
+            if distance > 20:
+                if self.rect.x < player.rect.x:
+                    self.rect.x += self.speed
+                    self.flip= False
+                    self.direction = 1
+                elif self.rect.x > player.rect.x:
+                    self.rect.x -= self.speed
+                    self.flip=True
+                    self.direction = -1 
 
 
     def get_damage(self, attack_power):
@@ -66,14 +66,13 @@ class Character(pygame.sprite.Sprite):
         if self.health <= 0:
             self.health = 0
             self.alive = False
-            self.kill()
             self.rect=pygame.Rect(0,0,0,0)
     
     def attack(self, target):
         attack_power = self.attack_power
         if self.special_ability == "extra_attack":
             attack_power = int(attack_power * 1.5)
-        if self.rect.colliderect(target.rect):
+        if pygame.sprite.collide_mask(self,target) and target != self:
             target.get_damage(attack_power)
 
     def basic_health(self):
