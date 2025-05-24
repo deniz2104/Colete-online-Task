@@ -1,56 +1,15 @@
 import pygame
-import random
-import time
-from constants_for_game import *
-from character import Character 
-from Button import Button
-
-def print_basic_stats_of_character(group):
-    counter=1
-    for character in group: 
-        print("Character",counter,":power =",character.attack_power,", defense =",character.defense_power)
-        counter+=1
-
-def print_ability_of_character(screen,player_message,opponent_message,font,duration=3):
-    start=time.time()
-    while time.time()-start < duration:
-        screen.blit(background,(0,0))
-        text_surface=font.render(player_message,True,(0,0,0))
-        text_surface_opponent=font.render(opponent_message,True,(0,0,0))
-        text_rect = text_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.9))
-        text_rect_opponent = text_surface_opponent.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2.2))
-        screen.blit(text_surface_opponent,text_rect_opponent)
-        screen.blit(text_surface,text_rect)
-        pygame.display.update()
-
-def show_message(screen, message, font,height=50):
-    text_surface = font.render(message, True, (0, 0, 0))
-    text_rect = text_surface.get_rect(center=(SCREEN_WIDTH // 2, height))
-    screen.blit(text_surface, text_rect)
-    pygame.display.update()
-
-def show_ability_status(screen,character,font):
-    if character.ability_active:
-        show_message(screen,f"Ability Active: {character.special_ability}", font, height=100)
-    elif character.ability_cooldown:
-        show_message(screen,f"Character is on cooldown", font, height=100)
-    else:
-        show_message(screen,f"Character can use ability", font, height=100)
-
+from constants_for_game import clock, FPS, screen, background
+from game_logic import print_basic_stats_of_character
+from game_states import handle_show_ability, handle_running
+from game_setup import initialize_game
 
 if __name__ == "__main__":
-    run = True
-    character1 = Character(0, SCREEN_HEIGHT // 1.5)
-    character2 = Character(SCREEN_WIDTH, SCREEN_HEIGHT // 1.5)
-    player = random.choice([character1, character2])
-    opponent = character1 if player == character2 else character2
-    player_group = pygame.sprite.Group()
-    player_group.add(player)
-    player_group.add(opponent)
+    # Initialize the game
+    player, opponent, player_group, current_turn, game_state = initialize_game()
     print_basic_stats_of_character(player_group)
-    game_state = "show_ability"
-    current_turn= random.choice(["player","opponent"])
 
+    run = True
     while run:
         clock.tick(FPS)
         screen.blit(background, (0, 0))
@@ -60,65 +19,12 @@ if __name__ == "__main__":
             if event.type == pygame.QUIT:
                 run = False
 
-        mouse_pos = pygame.mouse.get_pos()
-        mouse_pressed = pygame.mouse.get_pressed()
-
         if game_state == "show_ability":
-            print_ability_of_character(screen, "Ability chosen for player: " + str(player.special_ability),"Ability chosen for opp: " + str(opponent.special_ability),font)
-            game_state = "running"
+            game_state = handle_show_ability(player, opponent)
         elif game_state == "running":
-            keys = pygame.key.get_pressed()
-            moving_left = keys[pygame.K_LEFT] or keys[pygame.K_a]
-            moving_right = keys[pygame.K_RIGHT] or keys[pygame.K_d]
+            current_turn = handle_running(player, opponent, player_group, current_turn, events)
+            if current_turn is False:
+                run = False
 
-            if keys[pygame.K_r]:
-                player.activate_ability()
-            
-            if not opponent.ability_active and not opponent.ability_cooldown:
-                opponent.activate_ability()
-
-            player.update_ability()
-            opponent.update_ability()
-
-            for player_of_group in player_group:
-                if player_of_group == player:
-                    player_of_group.draw(is_opponent=False)
-                    player_of_group.move(moving_left, moving_right)
-                else:
-                    player_of_group.move_as_opponent(player)
-                    player_of_group.draw(is_opponent=True)
-
-
-            if current_turn == "player":
-                message = "Player Turn! Press Space to attack"
-                show_message(screen, message, font)
-                show_ability_status(screen, player, font)
-                for event in events:
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_SPACE and player.alive:
-                            if opponent.alive and abs(player.rect.x-opponent.rect.x) < 10:  
-                                player.attack(opponent)
-                                if not opponent.alive:
-                                    message = "Player Wins!"
-                                    show_message(screen, message, font)
-                                    pygame.time.delay(500)
-                                    run = False
-                                else:
-                                    current_turn = "opponent"
-                                    pygame.time.delay(1000)
-            else:
-                message = "Opponent Turn!"
-                show_message(screen, message, font)
-                show_ability_status(screen, opponent, font)
-                if player.alive and abs(player.rect.x-opponent.rect.x) < 10:
-                    opponent.attack(player)
-                    if not player.alive:  
-                        message = "Opponent Wins!"
-                        show_message(screen, message, font)
-                        pygame.time.delay(500)
-                        run = False  
-                    else:
-                        current_turn = "player"
-                        pygame.time.delay(1000)
         pygame.display.update()
     pygame.quit()
