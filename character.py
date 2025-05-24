@@ -15,7 +15,6 @@ class Character(pygame.sprite.Sprite):
         self.attack_power=random.randint(15, 20)
         self.alive = True 
         self.image= pygame.image.load('character.png').convert_alpha()
-        self.image_right=pygame.image.load('character_right.png').convert_alpha()
         self.flip = False
         self.direction=1
         self.rect=self.image.get_rect()
