@@ -5,10 +5,6 @@ from constants_for_game import *
 from character import Character 
 from Button import Button
 
-## am timp de regenerare pentru abilitate de 5 secunde
-## o pot folosi tot pentru 5 secunde
-## trebuie sa fac handling la bara de viata dinamica
-
 def print_basic_stats_of_character(group):
     counter=1
     for character in group: 
@@ -27,16 +23,23 @@ def print_ability_of_character(screen,player_message,opponent_message,font,durat
         screen.blit(text_surface,text_rect)
         pygame.display.update()
 
-def show_message(screen, message, font):
+def show_message(screen, message, font,height=50):
     text_surface = font.render(message, True, (0, 0, 0))
-    text_rect = text_surface.get_rect(center=(SCREEN_WIDTH // 2, 50))
+    text_rect = text_surface.get_rect(center=(SCREEN_WIDTH // 2, height))
     screen.blit(text_surface, text_rect)
     pygame.display.update()
+
+def show_ability_status(screen,character,font):
+    if character.ability_active:
+        show_message(screen,f"Ability Active: {character.special_ability}", font, height=100)
+    elif character.ability_cooldown:
+        show_message(screen,f"Character is on cooldown", font, height=100)
+    else:
+        show_message(screen,f"Character can use ability", font, height=100)
 
 
 if __name__ == "__main__":
     run = True
-    ability_chosen = False
     character1 = Character(0, SCREEN_HEIGHT // 1.5)
     character2 = Character(SCREEN_WIDTH, SCREEN_HEIGHT // 1.5)
     player = random.choice([character1, character2])
@@ -68,6 +71,15 @@ if __name__ == "__main__":
             moving_left = keys[pygame.K_LEFT] or keys[pygame.K_a]
             moving_right = keys[pygame.K_RIGHT] or keys[pygame.K_d]
 
+            if keys[pygame.K_r]:
+                player.activate_ability()
+            
+            if not opponent.ability_active and not opponent.ability_cooldown:
+                opponent.activate_ability()
+
+            player.update_ability()
+            opponent.update_ability()
+
             for player_of_group in player_group:
                 if player_of_group == player:
                     player_of_group.draw(is_opponent=False)
@@ -75,13 +87,16 @@ if __name__ == "__main__":
                 else:
                     player_of_group.move_as_opponent(player)
                     player_of_group.draw(is_opponent=True)
+
+
             if current_turn == "player":
                 message = "Player Turn! Press Space to attack"
                 show_message(screen, message, font)
+                show_ability_status(screen, player, font)
                 for event in events:
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_SPACE and player.alive:
-                            if opponent.alive:  
+                            if opponent.alive and abs(player.rect.x-opponent.rect.x) < 10:  
                                 player.attack(opponent)
                                 if not opponent.alive:
                                     message = "Player Wins!"
@@ -90,10 +105,11 @@ if __name__ == "__main__":
                                     run = False
                                 else:
                                     current_turn = "opponent"
-                                    pygame.time.delay(200)
+                                    pygame.time.delay(1000)
             else:
                 message = "Opponent Turn!"
                 show_message(screen, message, font)
+                show_ability_status(screen, opponent, font)
                 if player.alive and abs(player.rect.x-opponent.rect.x) < 10:
                     opponent.attack(player)
                     if not player.alive:  
@@ -103,6 +119,6 @@ if __name__ == "__main__":
                         run = False  
                     else:
                         current_turn = "player"
-                        pygame.time.delay(200)
+                        pygame.time.delay(1000)
         pygame.display.update()
     pygame.quit()

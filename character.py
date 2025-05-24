@@ -1,5 +1,6 @@
 import pygame
 import random
+import time
 from constants_for_game import screen,left_margin,right_margin
 class Character(pygame.sprite.Sprite):
     def __init__(self,x,y):
@@ -20,11 +21,32 @@ class Character(pygame.sprite.Sprite):
         self.rect=self.image.get_rect()
         self.rect.topleft=(x,y)
         self.special_ability=random.choice([None,"extra_attack","self_heal","half_damage_ability"])
+        self.ability_active=False
+        self.ability_cooldown= False
+        self.ability_start_time=0
+        self.cooldown_start_time=0
+
+    def activate_ability(self):
+        if not self.ability_cooldown and not self.ability_active:
+            self.ability_active = True
+            self.ability_start_time = time.time()
+
+    def update_ability(self):
+        if self.ability_active:
+            if time.time() - self.ability_start_time >= 5:
+                self.ability_active = False
+                self.ability_cooldown = True
+                self.cooldown_start_time = time.time()
+
+        if self.ability_cooldown:
+            if time.time() - self.cooldown_start_time >= 5:
+                self.ability_cooldown = False
 
     def draw(self,is_opponent=False):
         if self.alive:
             screen.blit(pygame.transform.flip(self.image,self.flip,False),self.rect)
             self.basic_health(is_opponent)
+
     def move(self,moving_left=False,moving_right=False):
         if not self.alive:
             return 
@@ -42,6 +64,7 @@ class Character(pygame.sprite.Sprite):
             self.rect.x = left_margin
         if self.rect.x > right_margin:
             self.rect.x = right_margin
+
     def move_as_opponent(self,player):
         if self.alive:
             distance = abs(self.rect.x - player.rect.x)
@@ -54,7 +77,6 @@ class Character(pygame.sprite.Sprite):
                     self.rect.x -= self.speed
                     self.flip=True
                     self.direction = -1 
-
 
     def get_damage(self, attack_power):
         damage = max(0,attack_power - self.defense_power)
@@ -81,7 +103,7 @@ class Character(pygame.sprite.Sprite):
                 self.displayed_health = self.health
 
         if self.displayed_health > self.health:
-            self.displayed_health -= 3 
+            self.displayed_health -= 0.2
 
         if is_opponent: 
             x_position = right_margin - self.health_bar_length //2 -25
