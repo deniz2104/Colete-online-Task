@@ -5,9 +5,8 @@ from constants_for_game import *
 from character import Character 
 from Button import Button
 
-## activez abilitatea asta cand vreau si o am pentru 3 secunde
-## calculatorul in schimb o activeaza random si o foloseste tot pentru 3 secunde 
 ## am timp de regenerare pentru abilitate de 5 secunde
+## o pot folosi tot pentru 5 secunde
 ## trebuie sa fac handling la bara de viata, ele acum se suprapun
 
 def print_basic_stats_of_character(group):
@@ -20,8 +19,8 @@ def print_ability_of_character(screen,player_message,opponent_message,font,durat
     start=time.time()
     while time.time()-start < duration:
         screen.blit(background,(0,0))
-        text_surface=font.render(player_message,True,(255,255,255))
-        text_surface_opponent=font.render(opponent_message,True,(255,255,255))
+        text_surface=font.render(player_message,True,(0,0,0))
+        text_surface_opponent=font.render(opponent_message,True,(0,0,0))
         text_rect = text_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 1.9))
         text_rect_opponent = text_surface_opponent.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2.2))
         screen.blit(text_surface_opponent,text_rect_opponent)
@@ -29,7 +28,7 @@ def print_ability_of_character(screen,player_message,opponent_message,font,durat
         pygame.display.update()
 
 def show_message(screen, message, font):
-    text_surface = font.render(message, True, (255, 255, 255))
+    text_surface = font.render(message, True, (0, 0, 0))
     text_rect = text_surface.get_rect(center=(SCREEN_WIDTH // 2, 50))
     screen.blit(text_surface, text_rect)
     pygame.display.update()
@@ -78,31 +77,31 @@ if __name__ == "__main__":
             if current_turn == "player":
                 message = "Player Turn! Press Space to attack"
                 show_message(screen, message, font)
-                for event in pygame.event.get():
+                for event in events:
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_SPACE and player.alive:
-                            if opponent.alive:  # Check if the opponent is alive
+                            if opponent.alive:  
                                 player.attack(opponent)
-                                if not opponent.alive:  # Check if the opponent died
+                                if not opponent.alive:
                                     message = "Player Wins!"
                                     show_message(screen, message, font)
                                     pygame.time.delay(500)
                                     run = False
                                 else:
                                     current_turn = "opponent"
-                                    pygame.time.delay(500)
+                                    pygame.time.delay(200)
             else:
                 message = "Opponent Turn!"
                 show_message(screen, message, font)
-                if player.alive and abs(player.rect.x-opponent.rect.x) <20:  ##aici trebuie sa verific daca playerul e langa el
+                if player.alive and abs(player.rect.x-opponent.rect.x) < 10:
                     opponent.attack(player)
-                    if not player.alive:  # Check if the player died
+                    if not player.alive:  
                         message = "Opponent Wins!"
                         show_message(screen, message, font)
                         pygame.time.delay(500)
                         run = False  
                     else:
                         current_turn = "player"
-                        pygame.time.delay(500)
+                        pygame.time.delay(200)
         pygame.display.update()
     pygame.quit()
