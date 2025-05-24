@@ -7,7 +7,7 @@ from Button import Button
 
 ## am timp de regenerare pentru abilitate de 5 secunde
 ## o pot folosi tot pentru 5 secunde
-## trebuie sa fac handling la bara de viata, ele acum se suprapun
+## trebuie sa fac handling la bara de viata dinamica
 
 def print_basic_stats_of_character(group):
     counter=1
@@ -70,10 +70,11 @@ if __name__ == "__main__":
 
             for player_of_group in player_group:
                 if player_of_group == player:
+                    player_of_group.draw(is_opponent=False)
                     player_of_group.move(moving_left, moving_right)
                 else:
                     player_of_group.move_as_opponent(player)
-                player_of_group.draw()
+                    player_of_group.draw(is_opponent=True)
             if current_turn == "player":
                 message = "Player Turn! Press Space to attack"
                 show_message(screen, message, font)
