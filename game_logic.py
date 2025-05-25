@@ -24,12 +24,13 @@ def show_message(screen, message, font, height=50):
     text_surface = font.render(message, True, (0, 0, 0))
     text_rect = text_surface.get_rect(center=(SCREEN_WIDTH // 2, height))
     screen.blit(text_surface, text_rect)
-    pygame.display.update()
 
 def show_ability_status(screen, character, font):
     if character.ability_active:
-        show_message(screen, f"Ability Active: {character.special_ability}", font, height=100)
+        message = f"Ability Active: {character.special_ability}"
     elif character.ability_cooldown:
-        show_message(screen, "Character is on cooldown", font, height=100)
+        message = "Character is on cooldown"
     else:
-        show_message(screen, "Character can use ability", font, height=100)
+        message = "Character can use ability"
+    show_message(screen, message,font , height=100)
+    pygame.display.update()
