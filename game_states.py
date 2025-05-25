@@ -1,6 +1,7 @@
 import pygame
+import time
 from game_logic import print_ability_of_character, show_message, show_ability_status
-from constants_for_game import screen, font
+from constants_for_game import screen, font,background
 
 def handle_show_ability(player, opponent):
     print_ability_of_character(
@@ -10,6 +11,15 @@ def handle_show_ability(player, opponent):
         font,
     )
     return "running"
+
+def handle_game_over(winner):
+    start_time = time.time()
+    while time.time() - start_time < 3:
+        screen.blit(background, (0, 0))
+        message = f"{winner} Wins!"
+        show_message(screen, message, font)
+        pygame.display.update()
+    return False
 
 def handle_running(player, opponent, player_group, current_turn, events):
     handle_abilities(player, opponent)
@@ -66,8 +76,7 @@ def handle_player_turn(player, opponent, events):
                 if opponent.alive and abs(player.rect.x - opponent.rect.x) < 10:
                     player.attack(opponent)
                     if not opponent.alive:
-                        # Handle win game state
-                        pass
+                        return handle_game_over("Player")
                     else:
                         pygame.time.delay(500)
                         return "opponent"
@@ -82,8 +91,7 @@ def handle_opponent_turn(player, opponent):
     if player.alive and abs(player.rect.x - opponent.rect.x) < 10:
         opponent.attack(player)
         if not player.alive:
-            # Handle game over state
-            pass
+            return handle_game_over("Opponent")
         else:
             pygame.time.delay(500)
             return "player"

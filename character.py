@@ -78,7 +78,7 @@ class Character(pygame.sprite.Sprite):
                     self.direction = -1 
 
     def get_damage(self, attack_power):
-        damage = max(0,attack_power - self.defense_power)
+        damage = max(2,attack_power - self.defense_power) ## atunci pentru cazul in care se va randomiza in egala masura
         if self.special_ability == "half_damage_ability":
             damage = damage // 2
         self.health -= damage
