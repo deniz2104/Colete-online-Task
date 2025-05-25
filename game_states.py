@@ -1,7 +1,6 @@
 import pygame
 from game_logic import print_ability_of_character, show_message, show_ability_status
 from constants_for_game import screen, font
-import time
 
 def handle_show_ability(player, opponent):
     print_ability_of_character(
@@ -13,9 +12,17 @@ def handle_show_ability(player, opponent):
     return "running"
 
 def handle_running(player, opponent, player_group, current_turn, events):
+    handle_abilities(player, opponent)
+
+    handle_movement(player, opponent, player_group)
+
+    current_turn = handle_turn(player, opponent, current_turn, events)
+
+    return current_turn
+
+
+def handle_abilities(player, opponent):
     keys = pygame.key.get_pressed()
-    moving_left = keys[pygame.K_LEFT] or keys[pygame.K_a]
-    moving_right = keys[pygame.K_RIGHT] or keys[pygame.K_d]
 
     if keys[pygame.K_r]:
         player.activate_ability()
@@ -26,43 +33,58 @@ def handle_running(player, opponent, player_group, current_turn, events):
     player.update_ability()
     opponent.update_ability()
 
-    for player_of_group in player_group:
-        if player_of_group == player:
-            player_of_group.move(moving_left, moving_right)
-            player_of_group.draw(is_opponent=False)
-        else:
-            player_of_group.move_as_opponent(player)
-            player_of_group.draw(is_opponent=True)
 
+def handle_movement(player, opponent, player_group):
+    keys = pygame.key.get_pressed()
+    moving_left = keys[pygame.K_LEFT] or keys[pygame.K_a]
+    moving_right = keys[pygame.K_RIGHT] or keys[pygame.K_d]
+
+    for character in player_group:
+        if character == player:
+            character.move(moving_left, moving_right)
+            character.draw(is_opponent=False)
+        else:
+            character.move_as_opponent(player)
+            character.draw(is_opponent=True)
+
+
+def handle_turn(player, opponent, current_turn, events):
     if current_turn == "player":
-        message = "Player Turn! Press Space to attack"
-        show_message(screen, message, font)
-        show_ability_status(screen, player, font)
-        for event in events:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and player.alive:
-                    if opponent.alive and abs(player.rect.x - opponent.rect.x) < 10:
-                        player.attack(opponent)
-                        if not opponent.alive:
-                            message = "Player Wins!"
-                            show_message(screen, message, font)
-                            pygame.time.delay(500)
-                            return False  # End game
-                        else:
-                            pygame.time.delay(1000)
-                            return "opponent"
+        return handle_player_turn(player, opponent, events)
     else:
-        message = "Opponent Turn!"
-        show_message(screen, message, font)
-        show_ability_status(screen, opponent, font)
-        if player.alive and abs(player.rect.x - opponent.rect.x) < 10:
-            opponent.attack(player)
-            if not player.alive:
-                message = "Opponent Wins!"
-                show_message(screen, message, font)
-                pygame.time.delay(500)
-                return False
-            else:
-                pygame.time.delay(1000)
-                return "player"
-    return current_turn
+        return handle_opponent_turn(player, opponent)
+
+
+def handle_player_turn(player, opponent, events):
+    message = "Player Turn! Press Space to attack"
+    show_message(screen, message, font)
+    show_ability_status(screen, player, font)
+
+    for event in events:
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE and player.alive:
+                if opponent.alive and abs(player.rect.x - opponent.rect.x) < 10:
+                    player.attack(opponent)
+                    if not opponent.alive:
+                        # Handle win game state
+                        pass
+                    else:
+                        pygame.time.delay(500)
+                        return "opponent"
+    return "player"
+
+
+def handle_opponent_turn(player, opponent):
+    message = "Opponent Turn!"
+    show_message(screen, message, font)
+    show_ability_status(screen, opponent, font)
+
+    if player.alive and abs(player.rect.x - opponent.rect.x) < 10:
+        opponent.attack(player)
+        if not player.alive:
+            # Handle game over state
+            pass
+        else:
+            pygame.time.delay(500)
+            return "player"
+    return "opponent"
