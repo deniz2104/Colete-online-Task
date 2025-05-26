@@ -65,10 +65,8 @@ def handle_movement(player, opponent, player_group):
 
 
 def handle_turn(player, opponent, current_turn, events):
-    if current_turn == "player":
-        return handle_player_turn(player, opponent, events)
-    else:
-        return handle_opponent_turn(player, opponent)
+    result = handle_player_turn(player, opponent, events) if current_turn == "player" else handle_opponent_turn(player, opponent)
+    return result
 
 def display_ability_status(character, current_turn="player",ability_used=False):
     message="Character 1 " if current_turn == "player" else "Character 2 "
@@ -91,10 +89,11 @@ def handle_player_turn(player, opponent, events):
                     player.attack(opponent)
                     display_ability_status(player, current_turn="player")
                     print(f"Character 2 has {opponent.health} health")
-                    pygame.time.delay(500)
-                    return "opponent"
-                elif not opponent.alive:
-                    return handle_game_over("Player")
+                    if not opponent.alive:
+                        return handle_game_over("Player")
+                    else:
+                        pygame.time.delay(500)
+                        return "opponent"
     return "player"
 
 
@@ -108,8 +107,9 @@ def handle_opponent_turn(player, opponent):
         opponent.attack(player)
         display_ability_status(opponent,current_turn="opponent")
         print(f"Character 1 has {player.health} health")
-        pygame.time.delay(500)
-        return "player"
-    elif not player.alive:
-        return handle_game_over("Opponent")
+        if not player.alive:
+            return handle_game_over("Opponent")
+        else:
+            pygame.time.delay(500)
+            return "player"
     return "opponent"

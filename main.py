@@ -6,7 +6,6 @@ from game_setup import initialize_game
 
 ## TODO: need to write on terminal the rounds
 if __name__ == "__main__":
-    # Initialize the game
     player, opponent, player_group, current_turn, game_state, round = initialize_game()
     print_basic_stats_of_character(player_group)
 
