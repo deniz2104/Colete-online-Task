@@ -1,11 +1,11 @@
 import random
 from character import Character
-from constants_for_game import SCREEN_HEIGHT, SCREEN_WIDTH
+from constants_for_game import SCREEN_HEIGHT, SCREEN_WIDTH,character_width
 import pygame
 
 def initialize_game():
     character1 = Character(0, SCREEN_HEIGHT // 2)
-    character2 = Character(SCREEN_WIDTH - 200, SCREEN_HEIGHT // 2)
+    character2 = Character(SCREEN_WIDTH-character_width, SCREEN_HEIGHT // 2)
 
     player = random.choice([character1, character2])
     opponent = character1 if player == character2 else character2
