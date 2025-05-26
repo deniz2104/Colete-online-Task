@@ -17,5 +17,6 @@ def initialize_game():
     current_turn = random.choice(["player", "opponent"])
 
     game_state = "show_ability"
+    round=1
 
-    return player, opponent, player_group, current_turn, game_state
+    return player, opponent, player_group, current_turn, game_state, round

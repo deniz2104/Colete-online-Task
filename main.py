@@ -7,7 +7,7 @@ from game_setup import initialize_game
 ## TODO: need to write on terminal the rounds
 if __name__ == "__main__":
     # Initialize the game
-    player, opponent, player_group, current_turn, game_state = initialize_game()
+    player, opponent, player_group, current_turn, game_state, round = initialize_game()
     print_basic_stats_of_character(player_group)
 
     run = True
@@ -27,7 +27,9 @@ if __name__ == "__main__":
             if current_turn is False:
                 game_state = "game_over"
         elif game_state == "game_over":
-            run = handle_game_over(winner="Player" if player.alive else "Opponent")
+            winner="Player" if player.alive else "Opponent"
+            print(f"{winner} won!")
+            run = handle_game_over(winner)
 
         pygame.display.update()
     pygame.quit()
