@@ -22,27 +22,19 @@ def handle_game_over(winner):
     return False
 
 def handle_running(player, opponent, player_group, current_turn, events):
-    # Static variables to track the round number and last printed turn
     if not hasattr(handle_running, "round_number"):
         handle_running.round_number = 1
-        handle_running.last_turn = None
+        print(f"Round {handle_running.round_number}:")
 
-    # Print the round number only when the turn changes
-    if handle_running.last_turn != current_turn:
-        if current_turn == "player":
-            print(f"Round {handle_running.round_number}:")
-        handle_running.last_turn = current_turn
-
-    # Handle abilities, movement, and turns
     handle_abilities(player, opponent)
     handle_movement(player, opponent, player_group)
-    current_turn = handle_turn(player, opponent, current_turn, events)
+    next_turn = handle_turn(player, opponent, current_turn, events)
 
-    # Increment the round number after the player's turn
-    if current_turn == "player" and handle_running.last_turn == "opponent":
+    if next_turn == "player" and current_turn == "opponent" or next_turn == "opponent" and current_turn == "player":
         handle_running.round_number += 1
+        print(f"Round {handle_running.round_number}:")
 
-    return current_turn
+    return next_turn
 
 
 def handle_abilities(player, opponent):
@@ -97,6 +89,7 @@ def handle_player_turn(player, opponent, events):
                 print("Character 1 attacks")
                 if opponent.alive and abs(player.rect.x - opponent.rect.x) < 10:
                     player.attack(opponent)
+                    display_ability_status(player, current_turn="player")
                     print(f"Character 2 has {opponent.health} health")
                     pygame.time.delay(500)
                     return "opponent"
@@ -113,6 +106,7 @@ def handle_opponent_turn(player, opponent):
     if player.alive and abs(player.rect.x - opponent.rect.x) < 10:
         print("Character 2 attacks")
         opponent.attack(player)
+        display_ability_status(opponent,current_turn="opponent")
         print(f"Character 1 has {player.health} health")
         pygame.time.delay(500)
         return "player"
